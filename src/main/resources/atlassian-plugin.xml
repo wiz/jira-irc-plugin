@@ -27,7 +27,7 @@
 
 	<web-panel key="ircPanel" location="webpanels.admin.summary.right-panels">
 		<label key="irc.project.label" />
-		<resource name="view" type="velocity" location="web-panel.vm" />
+		<resource name="view" type="velocity" location="vm/web-panel.vm" />
 	</web-panel>
 
 	<web-resource name="Admin Web Resources" key="admin-resources">

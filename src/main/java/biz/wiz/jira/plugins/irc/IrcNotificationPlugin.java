@@ -353,7 +353,12 @@ implements InitializingBean, DisposableBean
 	// helper methods
 	private void sendMessage(String projectId, String channelName, String message) // {{{
 	{
-		if (irc == null || isIrcActive(settings) == false || isIrcActiveForProject(settings, projectId) == false)
+		if (irc == null)
+		{
+			ircCreate();
+		}
+
+		if (isIrcActive(settings) == false || isIrcActiveForProject(settings, projectId) == false)
 		{
 			return;
 		}
