@@ -14,12 +14,12 @@
 				<input type="checkbox" id="active" name="active">
 			</div>
 			<div>
-				<label for="notice">$i18n.getText("irc.project.notice.label")</label>
-				<input type="checkbox" id="notice" name="notice">
-			</div>
-			<div>
 				<label for="channelName">$i18n.getText("irc.project.channelName.label")</label>
 				<input type="text" id="channelName" name="channelName" class="text">
+			</div>
+			<div>
+				<label for="notice">$i18n.getText("irc.project.notice.label")</label>
+				<input type="checkbox" id="notice" name="notice">
 			</div>
 			<div>
 				<label for="messageWithoutJoin">$i18n.getText("irc.project.messageWithoutJoin.label")</label>

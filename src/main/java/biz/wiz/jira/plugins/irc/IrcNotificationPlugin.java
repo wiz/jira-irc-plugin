@@ -3,7 +3,7 @@ package biz.wiz.jira.plugins.irc;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import javax.net.ssl.SSLSocketFactory;
+//import javax.net.ssl.SSLSocketFactory;
 
 import biz.wiz.jira.plugins.irc.beans.IrcAdminConfig;
 import biz.wiz.jira.plugins.irc.beans.IrcProjectConfig;
@@ -11,6 +11,7 @@ import biz.wiz.jira.plugins.irc.beans.IrcProjectConfig;
 import org.pircbotx.Configuration;
 import org.pircbotx.Colors;
 import org.pircbotx.PircBotX;
+import org.pircbotx.UtilSSLSocketFactory;
 
 // import org.slf4j.Logger;
 // import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ implements InitializingBean, DisposableBean
 	throws Exception
 	{ // {{{
 		this.settings = pluginSettingsFactory.createGlobalSettings();
-		ircConnect();
+		ircCreate();
 		// register ourselves with the EventPublisher
 		eventPublisher.register(this);
 	} // }}}
@@ -91,7 +92,7 @@ implements InitializingBean, DisposableBean
 	public void destroy()
 	throws Exception
 	{ // {{{
-		ircDisconnect();
+		ircDestroy();
 		// unregister ourselves with the EventPublisher
 		eventPublisher.unregister(this);
 	} // }}}
@@ -114,8 +115,10 @@ implements InitializingBean, DisposableBean
 		String userDisplayName = issueEvent.getUser().getDisplayName();
 		String userName = issueEvent.getUser().getName();
 
-		String channelName = getChannelName(settings, projectId);
+		String channelName = getIrcChannelForProject(settings, projectId);
 		// LOGGER.debug(String.format("channelName = %s", channelName));
+
+		// TODO: add local variables for colors and set using config option
 
 		// }}}
 		if (eventTypeId == EventType.ISSUE_CREATED_ID) // {{{
@@ -263,55 +266,45 @@ implements InitializingBean, DisposableBean
 		} // }}}
 	}
 	// IRC methods
-	private void ircConnect() // {{{
+	private void ircCreate() // {{{
 	{
-		/*
+		// irc is already initialized, destroy existing instance first
+		if (irc != null)
+		{
+			ircDestroy();
+		}
+
+		// only run if irc is enabled
 		if (isIrcActive(settings) != true)
 		{
 			return;
 		}
 
-		String ircServerName = getIrcServerName(settings);
-		//LOGGER.debug("irc server name = " + ircServerName);
+		// build config for irc client
+		Configuration.Builder configBuilder = new Configuration.Builder();
+
+		// get server hostname and port
+		String ircServerHost = getIrcServerHost(settings);
 		Integer ircServerPort = getIrcServerPort(settings);
+		configBuilder.setServer(ircServerHost, ircServerPort);
+		//LOGGER.debug("irc server name = " + ircServerHost);
 		//LOGGER.debug("irc server port = " + ircServerPort);
 
-		*/
-		if (irc == null)
+		// set to use ssl
+		if (isIrcServerSSL(settings))
 		{
-			Configuration config= new Configuration.Builder()
-				.setLogin("jira")
-				.setName("jira")
-				.setAutoNickChange(true)
-				.setServer("172.19.11.35", 6667)
-				.addAutoJoinChannel("#test")
-				//.setSocketFactory(SSLSocketFactory.getDefault())
-				.setRealName("JIRA IRC Plugin")
-				.buildConfiguration();
-
-			this.irc = new PircBotX(config);
-			new Thread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					try
-					{
-						irc.startBot();
-					}
-					catch (Exception ex)
-					{
-						// LOGGER.error(String.format("error connecting to IRC: %s", ex.toString()));
-					}
-				}
-			}).start();
+			configBuilder.setSocketFactory(new UtilSSLSocketFactory().trustAllCertificates());
 		}
 
-		if (irc.isConnected())
-		{
-			return;
-		}
+		// set irc client user and nick
+		String ircServerNick = getIrcServerNick(settings);
+		configBuilder.setLogin(ircServerNick);
+		configBuilder.setName(ircServerNick);
+		configBuilder.setAutoNickChange(true);
 
+		configBuilder.setRealName("JIRA IRC Plugin");
+
+		// iterate thru all projects, add channels to irc client config
 		List<Project> projects = projectManager.getProjectObjects();
 		for (Project project : projects)
 		{
@@ -319,43 +312,61 @@ implements InitializingBean, DisposableBean
 			String projectName = project.getName();
 			// LOGGER.debug(String.format("projectName = %s, projectId = %s", projectName, projectId));
 
-			if (isIrcActive(settings) && isIrcChannelActive(settings, projectId))
+			if (isIrcActive(settings) && isIrcActiveForProject(settings, projectId))
 			{
-				String channelName = getChannelName(settings, projectId);
+				String channelName = getIrcChannelForProject(settings, projectId);
+				//irc.sendIRC().joinChannel(channelName);
 				// LOGGER.debug(String.format("channelName = %s", channelName));
-				irc.sendIRC().joinChannel(channelName);
+				configBuilder.addAutoJoinChannel(channelName);
 			}
 		}
+
+		// create the irc client using our config
+		this.irc = new PircBotX(configBuilder.buildConfiguration());
+
+		// start the irc client in a new thread
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					irc.startBot();
+				}
+				catch (Exception ex)
+				{
+					// LOGGER.error(String.format("error connecting to IRC: %s", ex.toString()));
+				}
+			}
+		}).start();
+
 	} // }}}
-	private void ircDisconnect() // {{{
+	private void ircDestroy() // {{{
 	{
 		if (irc != null)
 		{
 			irc.sendIRC().quitServer("bye");
+			this.irc = null;
 		}
 	} // }}}
 	// helper methods
 	private void sendMessage(String projectId, String channelName, String message) // {{{
 	{
-		if (isIrcActive(settings) == false || isIrcChannelActive(settings, projectId) == false)
+		if (irc == null || isIrcActive(settings) == false || isIrcActiveForProject(settings, projectId) == false)
 		{
 			return;
 		}
 
-		if (irc == null)
-		{
-			return;
-		}
-
-		/*
-		if (Arrays.asList(irc.getChannels()).contains(channelName) == false)
+		/* // dont need because pircbotx will auto join
+		if (Arrays.asList(irc.getIrcChannelForProjects()).contains(channelName) == false)
 		{
 			// LOGGER.info(String.format("join channel (%s)", channelName));
 			irc.sendIRC().joinChannel(channelName);
 		}
 		*/
 
-		if (isIrcChannelNotice(settings, projectId))
+		if (isIrcNoticeForProject(settings, projectId))
 		{
 			irc.sendIRC().notice(channelName, message);
 		}
@@ -399,48 +410,83 @@ implements InitializingBean, DisposableBean
 		return url;
 	} // }}}
 	// config methods
-	private String getIrcServerName(PluginSettings settings) // {{{
+	private String getIrcServerHost(PluginSettings settings) // {{{
 	{
-		return (String) settings.get(IrcAdminConfig.class.getName() + ".ircServerName");
+		String ircServerHost = (String)settings.get(
+			IrcAdminConfig.class.getName() + ".ircServerHost"
+		);
+		if (ircServerHost == null || ircServerHost.equals(""))
+		{
+			return "127.0.0.1";
+		}
+		return ircServerHost;
 	} // }}}
 	private Integer getIrcServerPort(PluginSettings settings) // {{{
 	{
 		String ircServerPort = (String) settings.get(IrcAdminConfig.class.getName() + ".ircServerPort");
-		if (ircServerPort != null)
+		if (ircServerPort == null || ircServerPort.equals(""))
 		{
-			return Integer.parseInt(ircServerPort);
+			return Integer.parseInt("6667");
 		}
-		return null;
+		return Integer.parseInt(ircServerPort);
 	} // }}}
-	private String getChannelName(PluginSettings settings, String projectId) // {{{
+	private String getIrcServerNick(PluginSettings settings) // {{{
 	{
-		return (String)settings.get(
+		String ircServerNick = (String)settings.get(
+			IrcAdminConfig.class.getName() + ".ircServerNick"
+		);
+		if (ircServerNick == null || ircServerNick.equals(""))
+		{
+			return "jira";
+		}
+		return ircServerNick;
+	} // }}}
+	private String getIrcChannelForProject(PluginSettings settings, String projectId) // {{{
+	{
+		String channelName = (String)settings.get(
 			IrcProjectConfig.class.getName() + "_" + projectId + ".channelName"
 		);
+		if (channelName == null || channelName.equals(""))
+		{
+			return "#test";
+		}
+		return channelName;
 	} // }}}
-	private boolean isIrcChannelActive(PluginSettings settings, String projectId) // {{{
+	private boolean isIrcActiveForProject(PluginSettings settings, String projectId) // {{{
 	{
-		return Boolean.parseBoolean(
+		boolean active = Boolean.parseBoolean(
 			(String)settings.get(
 				IrcProjectConfig.class.getName() + "_" + projectId + ".active"
 			)
 		);
+		return active;
 	} // }}}
-	private boolean isIrcChannelNotice(PluginSettings settings, String projectId) // {{{
+	private boolean isIrcNoticeForProject(PluginSettings settings, String projectId) // {{{
 	{
-		return Boolean.parseBoolean(
+		boolean notice = Boolean.parseBoolean(
 			(String)settings.get(
 				IrcProjectConfig.class.getName() + "_" + projectId + ".notice"
 			)
 		);
+		return notice;
 	} // }}}
 	private boolean isIrcActive(PluginSettings settings) // {{{
 	{
-		return Boolean.parseBoolean(
+		boolean active = Boolean.parseBoolean(
 			(String)settings.get(
 				IrcAdminConfig.class.getName() + ".active"
 			)
 		);
+		return active;
+	} // }}}
+	private boolean isIrcServerSSL(PluginSettings settings) // {{{
+	{
+		boolean ircServerSSL = Boolean.parseBoolean(
+			(String)settings.get(
+				IrcAdminConfig.class.getName() + ".ircServerSSL"
+			)
+		);
+		return ircServerSSL;
 	} // }}}
 }
 // vim: foldmethod=marker wrap

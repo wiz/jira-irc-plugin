@@ -16,52 +16,52 @@ public final class IrcAdminConfig
 	private int ircServerPort;
 
 	@XmlElement
-	private Boolean useSSL;
+	private Boolean ircServerSSL;
 
 	@XmlElement
-	private String nick;
+	private String ircClientNick;
 
 	@XmlElement
 	private Boolean active;
 
-	public String getServerHost()
+	public String getIrcServerHost()
 	{
 		return ircServerHost;
 	}
 
-	public void setServerHost(String ircServerHost)
+	public void setIrcServerHost(String ircServerHost)
 	{
 		this.ircServerHost = ircServerHost;
 	}
 
-	public int getServerPort()
+	public int getIrcServerPort()
 	{
 		return ircServerPort;
 	}
 
-	public void setServerPort(int ircServerPort)
+	public void setIrcServerPort(int ircServerPort)
 	{
 		this.ircServerPort = ircServerPort;
 	}
 
-	public Boolean getUseSSL()
+	public Boolean getIrcServerSSL()
 	{
-		return useSSL;
+		return ircServerSSL;
 	}
 
-	public void setUseSSL(Boolean useSSL)
+	public void setIrcServerSSL(Boolean ircServerSSL)
 	{
-		this.useSSL = useSSL;
+		this.ircServerSSL = ircServerSSL;
 	}
 
-	public String getNick()
+	public String getIrcClientNick()
 	{
-		return nick;
+		return ircClientNick;
 	}
 
-	public void setNick(String nick)
+	public void setIrcClientNick(String ircClientNick)
 	{
-		this.nick = nick;
+		this.ircClientNick = ircClientNick;
 	}
 
 	public Boolean getActive()

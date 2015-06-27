@@ -62,17 +62,26 @@ public class IrcAdminConfigResource
 					PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 					IrcAdminConfig config = new IrcAdminConfig();
 
+					// active
 					String active = (String)settings.get(IrcAdminConfig.class.getName() + ".active");
 					config.setActive((active != null && Boolean.parseBoolean(active)));
-					config.setServerHost((String)settings.get(IrcAdminConfig.class.getName() + ".ircServerHost"));
+
+					// server hostname
+					config.setIrcServerHost((String)settings.get(IrcAdminConfig.class.getName() + ".ircServerHost"));
+
+					// server port
 					String ircServerPort = (String)settings.get(IrcAdminConfig.class.getName() + ".ircServerPort");
 					if (ircServerPort != null)
 					{
-						config.setServerPort(Integer.parseInt(ircServerPort));
+						config.setIrcServerPort(Integer.parseInt(ircServerPort));
 					}
-					String useSSL = (String) settings.get(IrcAdminConfig.class.getName() + ".useSSL");
-					config.setUseSSL((useSSL != null && Boolean.parseBoolean(useSSL)));
-					config.setNick((String) settings.get(IrcAdminConfig.class.getName() + ".nick"));
+
+					// server ssl or plaintext
+					String ircServerSSL = (String) settings.get(IrcAdminConfig.class.getName() + ".ircServerSSL");
+					config.setIrcServerSSL((ircServerSSL != null && Boolean.parseBoolean(ircServerSSL)));
+
+					// client nick
+					config.setIrcClientNick((String) settings.get(IrcAdminConfig.class.getName() + ".ircClientNick"));
 
 					return config;
 				}
@@ -99,8 +108,10 @@ public class IrcAdminConfigResource
 			{
 				PluginSettings pluginSettings = pluginSettingsFactory .createGlobalSettings();
 				pluginSettings.put(IrcAdminConfig.class.getName() + ".active", config.getActive().toString());
-				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerHost", config.getServerHost());
-				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerPort", Integer.toString(config.getServerPort()));
+				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerHost", config.getIrcServerHost());
+				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerPort", Integer.toString(config.getIrcServerPort()));
+				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerSSL", config.getIrcServerSSL().toString());
+				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircClientNick", config.getIrcClientNick());
 				return null;
 			}
 		});

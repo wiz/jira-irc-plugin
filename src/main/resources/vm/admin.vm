@@ -21,8 +21,8 @@
 				<input type="text" id="ircServerPort" name="ircServerPort" class="text">
 			</div>
 			<div>
-				<label for="useSSL">$i18n.getText("irc.admin.useSSL.label")</label>
-				<input type="checkbox" id="useSSL" name="useSSL">
+				<label for="ircServerSSL">$i18n.getText("irc.admin.ircServerSSL.label")</label>
+				<input type="checkbox" id="ircServerSSL" name="ircServerSSL">
 			</div>
 			<div>
 				<input id="submit" type="submit" value="$i18n.getText("irc.admin.save.label")" class="button">

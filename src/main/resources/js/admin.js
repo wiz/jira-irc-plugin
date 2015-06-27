@@ -20,14 +20,16 @@ AJS.toInit(function()
 				}
 
 				AJS.$('#ircServerHost').attr('value', config.ircServerHost);
+
 				AJS.$('#ircServerPort').attr('value', config.ircServerPort);
-				if (config.useSSL)
+
+				if (config.ircServerSSL)
 				{
-					AJS.$('#useSSL').attr('checked', 'checked');
+					AJS.$('#ircServerSSL').attr('checked', 'checked');
 				}
 				else
 				{
-					AJS.$('#useSSL').removeAttr('checked');
+					AJS.$('#ircServerSSL').removeAttr('checked');
 				}
 			}
 		});
@@ -40,7 +42,7 @@ AJS.toInit(function()
 			active: (AJS.$('#active').attr('checked') == 'checked'),
 			ircServerHost: AJS.$('#ircServerHost').attr('value'),
 			ircServerPort: AJS.$('#ircServerPort').attr('value'),
-			useSSL: (AJS.$('#useSSL').attr('checked') == 'checked')
+			ircServerSSL: (AJS.$('#ircServerSSL').attr('checked') == 'checked')
 		}
 		AJS.$.ajax(
 		{

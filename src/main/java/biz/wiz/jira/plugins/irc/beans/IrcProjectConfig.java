@@ -10,19 +10,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 public final class IrcProjectConfig
 {
 	@XmlElement
+	private Boolean active;
+
+	@XmlElement
 	private String channelName;
 
 	@XmlElement
 	private Boolean messageWithoutJoin;
 
 	@XmlElement
-	private Boolean noColors;
-
-	@XmlElement
 	private Boolean notice;
 
 	@XmlElement
-	private Boolean active;
+	private Boolean noColors;
 
 	public String getChannelName()
 	{

@@ -64,23 +64,29 @@ public class IrcProjectConfigResource
 						PluginSettings settings = pluginSettingsFactory.createGlobalSettings();
 						IrcProjectConfig config = new IrcProjectConfig();
 
+						// active or not
 						String active = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".active");
 						config.setActive((active != null && Boolean.parseBoolean(active)));
 
-						String notice = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".notice");
-						config.setNotice((notice != null && Boolean.parseBoolean(notice)));
-
-						String noColors = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".NoColors");
-						config.setNoColors((noColors != null && Boolean.parseBoolean(noColors)));
-
-						String messageWithoutJoin = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".MessageWithoutJoin");
-						config.setMessageWithoutJoin((messageWithoutJoin != null && Boolean.parseBoolean(messageWithoutJoin)));
-
+						// channel for project
 						String channelName = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".channelName");
 						if (channelName != null)
 						{
 							config.setChannelName(channelName);
 						}
+
+						// use privmsg or notice
+						String notice = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".notice");
+						config.setNotice((notice != null && Boolean.parseBoolean(notice)));
+
+						// add colors to notification
+						String noColors = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".noColors");
+						config.setNoColors((noColors != null && Boolean.parseBoolean(noColors)));
+
+						// notify without joining
+						String messageWithoutJoin = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".messageWithoutJoin");
+						config.setMessageWithoutJoin((messageWithoutJoin != null && Boolean.parseBoolean(messageWithoutJoin)));
+
 						return config;
 					}
 				}
@@ -107,8 +113,10 @@ public class IrcProjectConfigResource
 			{
 				PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
 				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".active", config.getActive().toString());
-				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".notice", config.getNotice().toString());
 				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".channelName", config.getChannelName());
+				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".notice", config.getNotice().toString());
+				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".messageWithoutJoin", config.getMessageWithoutJoin().toString());
+				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".noColors", config.getNoColors().toString());
 				return null;
 			}
 		});
