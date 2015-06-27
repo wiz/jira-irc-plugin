@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public final class ProjectConfig
+public final class IrcProjectConfig
 {
 	@XmlElement
 	private String channelName;

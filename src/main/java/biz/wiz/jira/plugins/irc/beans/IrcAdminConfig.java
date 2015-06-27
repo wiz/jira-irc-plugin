@@ -7,13 +7,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public final class ServerConfig
+public final class IrcAdminConfig
 {
 	@XmlElement
-	private String serverHostname;
+	private String ircServerHost;
 
 	@XmlElement
-	private int serverPort;
+	private int ircServerPort;
 
 	@XmlElement
 	private Boolean useSSL;
@@ -24,24 +24,24 @@ public final class ServerConfig
 	@XmlElement
 	private Boolean active;
 
-	public String getChannelName()
+	public String getServerHost()
 	{
-		return serverHostname;
+		return ircServerHost;
 	}
 
-	public void setChannelName(String serverHostname)
+	public void setServerHost(String ircServerHost)
 	{
-		this.serverHostname = serverHostname;
+		this.ircServerHost = ircServerHost;
 	}
 
 	public int getServerPort()
 	{
-		return serverPort;
+		return ircServerPort;
 	}
 
-	public void setServerPort(int serverPort)
+	public void setServerPort(int ircServerPort)
 	{
-		this.serverPort = serverPort;
+		this.ircServerPort = ircServerPort;
 	}
 
 	public Boolean getUseSSL()

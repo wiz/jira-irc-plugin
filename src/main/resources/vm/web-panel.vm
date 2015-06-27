@@ -1,0 +1,1 @@
+<a href="${baseurl}/plugins/servlet/irc/project?projectId=$project.id">$i18n.getText("irc.project.label")</a>

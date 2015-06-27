@@ -1,32 +1,74 @@
 <atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
-    <plugin-info>
-        <description>${project.description}</description>
-        <version>${project.version}</version>
-        <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="plugin-icon">images/pluginIcon.png</param>
-        <param name="plugin-logo">images/pluginLogo.png</param>
-    </plugin-info>
+	<plugin-info>
+		<description>${project.description}</description>
+		<version>${project.version}</version>
+		<vendor name="${project.organization.name}" url="${project.organization.url}" />
+		<param name="plugin-icon">images/pluginIcon.png</param>
+		<param name="plugin-logo">images/pluginLogo.png</param>
+		<import-package>
+			org.pircbotx.*;
+		</import-package>
+	</plugin-info>
 
-    <!-- add our i18n resource -->
-    <resource type="i18n" name="i18n" location="jira-irc-plugin"/>
-    
-    <!-- add our web resources -->
-    <web-resource key="jira-irc-plugin-resources" name="jira-irc-plugin Web Resources">
-        <dependency>com.atlassian.auiplugin:ajs</dependency>
-        
-        <resource type="download" name="jira-irc-plugin.css" location="/css/jira-irc-plugin.css"/>
-        <resource type="download" name="jira-irc-plugin.js" location="/js/jira-irc-plugin.js"/>
-        <resource type="download" name="images/" location="/images"/>
+	<!-- add our i18n resource -->
+	<resource type="i18n" name="i18n" location="i18n"/>
 
-        <context>jira-irc-plugin</context>
-    </web-resource>
-    
-    <!-- publish our component -->
-    <component key="myPluginComponent" class="biz.wiz.jira.plugins.irc.MyPluginComponentImpl" public="true">
-        <interface>biz.wiz.jira.plugins.irc.MyPluginComponent</interface>
-    </component>
-    
-    <!-- import from the product container -->
-    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
-    
+	<!-- add our web resources -->
+	<web-item key="jira-menu-item" name="IRC Notifications"
+		section="system.admin/globalsettings" weight="10" application="jira">
+		<description>Link to irc-plugin-admin page.</description>
+		<label key="irc.admin.label" />
+		<link linkId="irc-admin-link">/plugins/servlet/irc/admin</link>
+	</web-item>
+
+	<web-panel key="ircPanel" location="webpanels.admin.summary.right-panels">
+		<label key="irc.project.label" />
+		<resource name="view" type="velocity" location="web-panel.vm" />
+	</web-panel>
+
+	<web-resource name="Admin Web Resources" key="admin-resources">
+		<dependency>com.atlassian.auiplugin:ajs</dependency>
+		<resource type="download" name="admin.js" location="js/admin.js" />
+	</web-resource>
+
+	<web-resource name="Project Web Resources" key="project-resources">
+		<dependency>com.atlassian.auiplugin:ajs</dependency>
+		<resource type="download" name="project.js" location="js/project.js" />
+	</web-resource>
+
+	<!-- configuration servlets -->
+	<rest key="rest" path="/irc" version="1.0">
+		<description>Provides REST resources for the admin UI.</description>
+	</rest>
+
+	<servlet key="admin-servlet" class="biz.wiz.jira.plugins.irc.servlet.AdminServlet">
+		<url-pattern>/irc/admin</url-pattern>
+	</servlet>
+
+	<servlet key="project-servlet" class="biz.wiz.jira.plugins.irc.servlet.ProjectServlet">
+		<url-pattern>/irc/project</url-pattern>
+	</servlet>
+
+	<!-- publish our component -->
+	<component key="eventListener" class="biz.wiz.jira.plugins.irc.IrcNotificationPlugin">
+		<description>Class that processes the incoming JIRA issue events.</description>
+	</component>
+
+	<component-import key="transactionTemplate" interface="com.atlassian.sal.api.transaction.TransactionTemplate" />
+	<component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" />
+	<component-import key="loginUriProvider" interface="com.atlassian.sal.api.auth.LoginUriProvider" />
+	<component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
+	<component-import key="velocity-renderer" interface="com.atlassian.templaterenderer.velocity.one.six.VelocityTemplateRenderer" />
+	<component-import key="pluginSettingsFactory" interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory" />
+	<component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher">
+		<description>atlassian-event EventPublisher imported from system bundle.</description>
+	</component-import>
+
+	<template-context-item key="applicationPropertiesContextItem"
+		component-ref="applicationProperties" context-key="applicationProperties"
+		name="Application Properties Context Item" />
+
+	<template-context-item key="rendererHelperContextItem"
+		component-ref="velocity-renderer" context-key="helper"
+		name="Renderer Helper Context Item" />
 </atlassian-plugin>
