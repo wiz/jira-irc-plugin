@@ -79,7 +79,7 @@ implements InitializingBean, DisposableBean
 	throws Exception
 	{ // {{{
 		this.settings = pluginSettingsFactory.createGlobalSettings();
-		//ircConnect();
+		ircConnect();
 		// register ourselves with the EventPublisher
 		eventPublisher.register(this);
 	} // }}}
@@ -265,6 +265,7 @@ implements InitializingBean, DisposableBean
 	// IRC methods
 	private void ircConnect() // {{{
 	{
+		/*
 		if (isIrcActive(settings) != true)
 		{
 			return;
@@ -275,15 +276,16 @@ implements InitializingBean, DisposableBean
 		Integer ircServerPort = getIrcServerPort(settings);
 		//LOGGER.debug("irc server port = " + ircServerPort);
 
+		*/
 		if (irc == null)
 		{
 			Configuration config= new Configuration.Builder()
 				.setLogin("jira")
 				.setName("jira")
 				.setAutoNickChange(true)
-				.setServer("irc.tokyo.jp", 7000)
+				.setServer("172.19.11.35", 6667)
 				.addAutoJoinChannel("#test")
-				.setSocketFactory(SSLSocketFactory.getDefault())
+				//.setSocketFactory(SSLSocketFactory.getDefault())
 				.setRealName("JIRA IRC Plugin")
 				.buildConfiguration();
 
