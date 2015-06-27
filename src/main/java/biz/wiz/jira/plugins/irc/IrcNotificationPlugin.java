@@ -290,14 +290,21 @@ implements InitializingBean, DisposableBean
 				.buildConfiguration();
 
 			this.irc = new PircBotX(config);
-			try
+			new Thread(new Runnable()
 			{
-				irc.startBot();
-			}
-			catch (Exception ex)
-			{
-				// LOGGER.error(String.format("error connecting to IRC: %s", ex.toString()));
-			}
+				@Override
+				public void run()
+				{
+					try
+					{
+						irc.startBot();
+					}
+					catch (Exception ex)
+					{
+						// LOGGER.error(String.format("error connecting to IRC: %s", ex.toString()));
+					}
+				}
+			}).start();
 		}
 
 		if (irc.isConnected())
@@ -322,7 +329,7 @@ implements InitializingBean, DisposableBean
 	} // }}}
 	private void ircDisconnect() // {{{
 	{
-		if (irc != null && irc.isConnected())
+		if (irc != null)
 		{
 			irc.sendIRC().quitServer("bye");
 		}
