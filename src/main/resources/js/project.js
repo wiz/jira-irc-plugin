@@ -29,13 +29,13 @@ AJS.toInit(function() {
 					AJS.$('#notice').removeAttr('checked');
 				}
 
-				if (config.messageWithoutJoin)
+				if (config.joinChannel)
 				{
-					AJS.$('#messageWithoutJoin').attr('checked', 'checked');
+					AJS.$('#joinChannel').attr('checked', 'checked');
 				}
 				else
 				{
-					AJS.$('#messageWithoutJoin').removeAttr('checked');
+					AJS.$('#joinChannel').removeAttr('checked');
 				}
 
 				if (config.noColors)
@@ -57,7 +57,7 @@ AJS.toInit(function() {
 			active: (AJS.$('#active').attr('checked') == 'checked'),
 			channelName: AJS.$('#channelName').attr('value'),
 			notice: (AJS.$('#notice').attr('checked') == 'checked'),
-			messageWithoutJoin: (AJS.$('#messageWithoutJoin').attr('value') == 'checked'),
+			joinChannel: (AJS.$('#joinChannel').attr('value') == 'checked'),
 			noColors: (AJS.$('#noColors').attr('value') == 'checked')
 		};
 		AJS.$.ajax(

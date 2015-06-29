@@ -14,8 +14,8 @@ import javax.ws.rs.core.Response.Status;
 
 import biz.wiz.jira.plugins.irc.beans.IrcProjectConfig;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
@@ -29,7 +29,7 @@ public class IrcProjectConfigResource
 	private final UserManager userManager;
 	private final PluginSettingsFactory pluginSettingsFactory;
 	private final TransactionTemplate transactionTemplate;
-	//private static final Logger LOGGER = LoggerFactory .getLogger(ProjectServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(IrcProjectConfigResource.class);
 
 	public IrcProjectConfigResource
 	(
@@ -52,7 +52,7 @@ public class IrcProjectConfigResource
 		@Context HttpServletRequest request
 	)
 	{
-		// LOGGER.debug(String.format("get : start(%s,%s)",projectId,request));
+		LOGGER.debug(String.format("get : start(%s,%s)",projectId,request));
 		String username = userManager.getRemoteUsername(request);
 		Response response = Response.ok
 		(
@@ -84,15 +84,15 @@ public class IrcProjectConfigResource
 						config.setNoColors((noColors != null && Boolean.parseBoolean(noColors)));
 
 						// notify without joining
-						String messageWithoutJoin = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".messageWithoutJoin");
-						config.setMessageWithoutJoin((messageWithoutJoin != null && Boolean.parseBoolean(messageWithoutJoin)));
+						String joinChannel = (String) settings.get(IrcProjectConfig.class.getName() + "_" + projectId + ".joinChannel");
+						config.setJoinChannel((joinChannel != null && Boolean.parseBoolean(joinChannel)));
 
 						return config;
 					}
 				}
 			)
 		).build();
-		// LOGGER.debug(String.format("get : finished(%s)",response));
+		LOGGER.debug(String.format("get : finished(%s)",response));
 		return response;
 	}
 
@@ -115,7 +115,7 @@ public class IrcProjectConfigResource
 				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".active", config.getActive().toString());
 				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".channelName", config.getChannelName());
 				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".notice", config.getNotice().toString());
-				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".messageWithoutJoin", config.getMessageWithoutJoin().toString());
+				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".joinChannel", config.getJoinChannel().toString());
 				pluginSettings.put(IrcProjectConfig.class.getName() + "_" + projectId + ".noColors", config.getNoColors().toString());
 				return null;
 			}

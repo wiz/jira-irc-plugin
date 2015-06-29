@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.atlassian.sal.api.auth.LoginUriProvider;
 import com.atlassian.sal.api.user.UserManager;
@@ -20,7 +20,7 @@ import com.atlassian.templaterenderer.TemplateRenderer;
 public class AdminServlet extends HttpServlet
 {
 	// {{{ member vars
-	//private static final Logger LOGGER = LoggerFactory.getLogger(AdminServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AdminServlet.class);
 	private final UserManager userManager;
 	private final TemplateRenderer renderer;
 	private final LoginUriProvider loginUriProvider;
@@ -42,30 +42,30 @@ public class AdminServlet extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws IOException, ServletException
 	{
-		// LOGGER.debug(String.format("doGet : start(%s, %s)", request, response));
+		LOGGER.debug(String.format("doGet : start(%s, %s)", request, response));
 		String username = userManager.getRemoteUsername(request);
 		if (username != null && !userManager.isSystemAdmin(username))
 		{
 			redirectToLogin(request, response);
-			// LOGGER.debug("doGet : finished");
+			LOGGER.debug("doGet : finished");
 			return;
 		}
 		response.setContentType("text/html;charset=utf-8");
 		renderer.render("vm/admin.vm", response.getWriter());
-		// LOGGER.debug("doGet : finished");
+		LOGGER.debug("doGet : finished");
 	}
 
 	private void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
 	throws IOException
 	{
-		// LOGGER.debug(String.format("redirectToLogin : start(%s, %s)", request, response));
+		LOGGER.debug(String.format("redirectToLogin : start(%s, %s)", request, response));
 		response.sendRedirect(loginUriProvider.getLoginUri(getUri(request)).toASCIIString());
-		// LOGGER.debug("redirectToLogin : finished");
+		LOGGER.debug("redirectToLogin : finished");
 	}
 
 	private URI getUri(HttpServletRequest request)
 	{
-		// LOGGER.debug(String.format("getUri : start(%s)", request));
+		LOGGER.debug(String.format("getUri : start(%s)", request));
 		StringBuffer builder = request.getRequestURL();
 		if (request.getQueryString() != null)
 		{
@@ -73,7 +73,7 @@ public class AdminServlet extends HttpServlet
 			builder.append(request.getQueryString());
 		}
 		URI result = URI.create(builder.toString());
-		// LOGGER.debug(String.format("getUri : finished(%s)", result));
+		LOGGER.debug(String.format("getUri : finished(%s)", result));
 		return result;
 	}
 }

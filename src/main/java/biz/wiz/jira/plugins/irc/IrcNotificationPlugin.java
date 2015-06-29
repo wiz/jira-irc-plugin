@@ -13,8 +13,8 @@ import org.pircbotx.Colors;
 import org.pircbotx.PircBotX;
 import org.pircbotx.UtilSSLSocketFactory;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -44,7 +44,7 @@ public class IrcNotificationPlugin
 implements InitializingBean, DisposableBean
 {
 	// {{{ member variables
-	//private static final Logger LOGGER = LoggerFactory.getLogger(AdminServlet.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(IrcNotificationPlugin.class);
 	private final EventPublisher eventPublisher;
 	private final PluginSettingsFactory pluginSettingsFactory;
 	private final VelocityRequestContextFactory velocityRequestContextFactory;
@@ -116,57 +116,183 @@ implements InitializingBean, DisposableBean
 		String userName = issueEvent.getUser().getName();
 
 		String channelName = getIrcChannelForProject(settings, projectId);
-		// LOGGER.debug(String.format("channelName = %s", channelName));
+		LOGGER.debug(String.format("channelName = %s", channelName));
 
 		// TODO: add local variables for colors and set using config option
 
 		// }}}
-		if (eventTypeId == EventType.ISSUE_CREATED_ID) // {{{
+		if (eventTypeId.equals(EventType.ISSUE_ASSIGNED_ID)) // {{{
+		{
+			// line 1
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s Assigned: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+				//issueKey, userDisplayName, userName, assigneeUserDisplayName, assigneeUserName, issueTypeName, issueSummary);
+			sendNotification(projectId, channelName, message);
+			// line 2
+			String assigneeUserDisplayName = issue.getAssigneeUser().getDisplayName();
+			String assigneeUserName = issue.getAssigneeUser().getName();
+			message = message.concat(String.format("%s (%s) assigned to %s (%s)", assigneeUserDisplayName, assigneeUserName));
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_CLOSED_ID)) // {{{
+		{
+			// line 1
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s Closed: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+			sendNotification(projectId, channelName, message);
+			// line 2
+			message = String.format("%s (%s) closed %s", userDisplayName, userName, issueKey);
+			sendNotification(projectId, channelName, message);
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_COMMENTED_ID) || eventTypeId.equals(EventType.ISSUE_COMMENT_EDITED_ID)) // {{{
+		{
+			Comment comment = issueEvent.getComment();
+			User authorUser = comment.getAuthorUser();
+			String authUserDisplayName = authorUser.getDisplayName();
+			String authUserName = authorUser.getName();
+			String commentBody = StringUtils.abbreviate(comment.getBody(), 20);
+
+			// line 1
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s Comment: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s" +
+					"?focusedCommentId=%d" +
+					"&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" +
+					"#comment-%d",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue),
+				comment.getId().longValue(), comment.getId().longValue());
+			sendNotification(projectId, channelName, message);
+			// line 2
+			message = String.format("%s (%s) commented on %s", userDisplayName, userName, issueKey);
+			sendNotification(projectId, channelName, message);
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_CREATED_ID)) // {{{
 		{
 			boolean hasAssigneeUser = issue.getAssigneeUser() != null;
 
+			// line 1
 			String message = String.format(
 					Colors.RED + "[%s] " + Colors.NORMAL +
-					"%s (%s) has created %s: " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
+					"%s Created: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+			sendNotification(projectId, channelName, message);
+			// line 2
+			if (hasAssigneeUser)
+			{
+				String assigneeUserDisplayName = issue.getAssigneeUser().getDisplayName();
+				String assigneeUserName = issue.getAssigneeUser().getName();
+				message = String.format(
+						"%s (%s) created and assigned %s to %s (%s)",
+					userDisplayName, userName, issueKey, assigneeUserDisplayName, assigneeUserName);
+			}
+			else
+			{
+				message = String.format("%s (%s) created %s", userDisplayName, userName, issueKey);
+			}
+			sendNotification(projectId, channelName, message);
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_DELETED_ID)) // {{{
+		{
+			boolean hasAssigneeUser = issue.getAssigneeUser() != null;
 
+			// line 1
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s Deleted: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+			sendNotification(projectId, channelName, message);
+			// line 2
+			message = String.format("%s (%s) deleted %s", userDisplayName, userName, issueKey);
 			if (hasAssigneeUser)
 			{
 				String assigneeUserDisplayName = issue.getAssigneeUser().getDisplayName();
 				String assigneeUserName = issue.getAssigneeUser().getName();
 				message = message.concat(String.format(" - assigned to %s (%s)", assigneeUserDisplayName, assigneeUserName));
 			}
-			sendMessage(projectId, channelName, message);
-			sendIssueEventComment(settings, projectId, channelName, issueEvent);
-			sendIssueUrl(channelName, issue);
+			sendNotification(projectId, channelName, message);
 		} // }}}
-		else if (eventTypeId == EventType.ISSUE_ASSIGNED_ID) // {{{
+		else if (eventTypeId.equals(EventType.ISSUE_MOVED_ID)) // {{{
 		{
-			String assigneeUserDisplayName = issue.getAssigneeUser().getDisplayName();
-			String assigneeUserName = issue.getAssigneeUser().getName();
-
-			String message = String.format(
-					Colors.RED + "[%s] " + Colors.NORMAL + // issueKey
-					" %s (%s) assigned to %s (%s) %s: " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, userDisplayName, userName, assigneeUserDisplayName, assigneeUserName, issueTypeName, issueSummary);
-
-			sendMessage(projectId, channelName, message);
-			sendIssueUrl(channelName, issue);
+			// TODO
 		} // }}}
-		else if (eventTypeId == EventType.ISSUE_WORKSTARTED_ID) // {{{
+		else if (eventTypeId.equals(EventType.ISSUE_REOPENED_ID)) // {{{
 		{
+			boolean hasAssigneeUser = issue.getAssigneeUser() != null;
+
+			// line 1
 			String message = String.format(
 					Colors.RED + "[%s] " + Colors.NORMAL +
-					"%s (%s) has started working on %s: " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
-
-			sendMessage(projectId, channelName, message);
-			sendIssueUrl(channelName, issue);
+					"%s Re-Opened: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+			sendNotification(projectId, channelName, message);
+			// line 2
+			message = String.format("%s (%s) re-opened %s", userDisplayName, userName, issueKey);
+			if (hasAssigneeUser)
+			{
+				String assigneeUserDisplayName = issue.getAssigneeUser().getDisplayName();
+				String assigneeUserName = issue.getAssigneeUser().getName();
+				message = message.concat(String.format(" - assigned to %s (%s)", assigneeUserDisplayName, assigneeUserName));
+			}
+			sendNotification(projectId, channelName, message);
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
 		} // }}}
-		else if (eventTypeId == EventType.ISSUE_WORKLOGGED_ID) // {{{
+		else if (eventTypeId.equals(EventType.ISSUE_RESOLVED_ID)) // {{{
+		{
+			// line 1
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s Resolved: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+			sendNotification(projectId, channelName, message);
+			// line 2
+			message = String.format("%s (%s) resolved %s", userDisplayName, userName, issueKey);
+			sendNotification(projectId, channelName, message);
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_UPDATED_ID)) // {{{
+		{
+			// line 1
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s Updated: " +
+					Colors.BOLD + "%s" + Colors.NORMAL +
+					" <- %s",
+				issueKey, issueTypeName, issueSummary, getIssueUrl(issue));
+			sendNotification(projectId, channelName, message);
+			// line 2
+			message = String.format("%s (%s) updated %s", userDisplayName, userName, issueKey);
+			sendNotification(projectId, channelName, message);
+			// line 3
+			sendIssueEventComment(settings, projectId, channelName, issueEvent);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_WORKLOGGED_ID)) // {{{
 		{
 			Worklog worklog = issueEvent.getWorklog();
 			String authorFullName = worklog.getAuthorFullName();
@@ -178,14 +304,14 @@ implements InitializingBean, DisposableBean
 					Colors.BOLD + "%s" + Colors.NORMAL,
 				issueKey, authorFullName, author, issueTypeName, issueSummary);
 
-			sendMessage(projectId, channelName, message);
+			sendNotification(projectId, channelName, message);
 			Long timeSpent = worklog.getTimeSpent();
 			sendTimeSpent(projectId, channelName, timeSpent);
 
 			if (StringUtils.isNotBlank(worklog.getComment()))
 			{
 				String comment = StringUtils.abbreviate(worklog.getComment(), 20);
-				sendMessage(projectId, channelName, String.format("\"%s\"", comment));
+				sendNotification(projectId, channelName, String.format("\"%s\"", comment));
 			}
 
 			sendIssueUrl( settings, channelName, issue,
@@ -193,7 +319,27 @@ implements InitializingBean, DisposableBean
 							"?focusedWorklogId=%s&page=com.atlassian.jira.plugin.system.issuetabpanels&worklog-tabpanel#worklog-%s",
 					worklog.getId().toString(), worklog.getId().toString()));
 		} // }}}
-		else if (eventTypeId == EventType.ISSUE_WORKSTOPPED_ID) // {{{
+	/*
+		else if (eventTypeId.equals(EventType.ISSUE_WORKLOG_DELETED_ID)) // {{{
+		{
+			// TODO
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_WORKLOG_UPDATED_ID)) // {{{
+		{
+			// TODO
+		} // }}}
+	*/
+		else if (eventTypeId.equals(EventType.ISSUE_WORKSTARTED_ID)) // {{{
+		{
+			String message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s (%s) has started working on %s: " +
+					Colors.BOLD + "%s" + Colors.NORMAL,
+				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
+
+			sendNotification(projectId, channelName, message);
+		} // }}}
+		else if (eventTypeId.equals(EventType.ISSUE_WORKSTOPPED_ID)) // {{{
 		{
 			String message = String.format(
 					Colors.RED + "[%s] " + Colors.NORMAL +
@@ -201,73 +347,17 @@ implements InitializingBean, DisposableBean
 					Colors.BOLD + "%%s" + Colors.NORMAL,
 				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
 
-			sendMessage(projectId, channelName, message);
-			sendIssueUrl(channelName, issue);
+			sendNotification(projectId, channelName, message);
 		} // }}}
-		else if (eventTypeId == EventType.ISSUE_COMMENTED_ID) // {{{
+		else // {{{
 		{
-			Comment comment = issueEvent.getComment();
-			User authorUser = comment.getAuthorUser();
-			String authUserDisplayName = authorUser.getDisplayName();
-			String authUserName = authorUser.getName();
-			String commentBody = StringUtils.abbreviate(comment.getBody(), 20);
-
-			String message = String.format(
-					Colors.RED + "[%s] " + Colors.NORMAL +
-					"%s (%s) has commented on %s:  " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, authUserDisplayName, authUserName, issueTypeName, issueSummary);
-
-			sendMessage(projectId, channelName, message);
-			sendMessage(projectId, channelName, String.format("\"%s\"", commentBody));
-			sendIssueUrl(
-					settings,
-					channelName,
-					issue,
-					String.format(
-							"?focusedCommentId=%d&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-%d",
-							comment.getId().longValue(), comment.getId()
-									.longValue()));
-		} // }}}
-		else if (eventTypeId == EventType.ISSUE_RESOLVED_ID) // {{{
-		{
-			String message = String.format(
-					Colors.RED + "[%s] " + Colors.NORMAL +
-					"%s (%s) has resolved %s: " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
-
-			sendMessage(projectId, channelName, message);
-			sendTimeSpent(projectId, channelName, issue.getTimeSpent());
-			sendIssueEventComment(settings, projectId, channelName, issueEvent);
-			sendIssueUrl(channelName, issue);
-		} // }}}
-		else if (eventTypeId == EventType.ISSUE_CLOSED_ID) // {{{
-		{
-			String message = String.format(
-					Colors.RED + "[%s] " + Colors.NORMAL +
-					"%s (%s) has closed %s: " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
-
-			sendMessage(projectId, channelName, message);
-			sendIssueUrl(channelName, issue);
-		} // }}}
-		else if (eventTypeId == EventType.ISSUE_REOPENED_ID) // {{{
-		{
-			String message = String.format(
-					Colors.RED + "[%s] " + Colors.NORMAL +
-					"%s (%s) has re-opened %s: " +
-					Colors.BOLD + "%s" + Colors.NORMAL,
-				issueKey, userDisplayName, userName, issueTypeName, issueSummary);
-
-			sendMessage(projectId, channelName, message);
-			sendIssueUrl(channelName, issue);
-		} // }}}
+			LOGGER.info(String.format("unhandled eventTypeId %s", eventTypeId));
+		} // }}} 
 	}
 	// IRC methods
 	private void ircCreate() // {{{
 	{
+		LOGGER.info("ircCreate()");
 		// irc is already initialized, destroy existing instance first
 		if (irc != null)
 		{
@@ -287,8 +377,9 @@ implements InitializingBean, DisposableBean
 		String ircServerHost = getIrcServerHost(settings);
 		Integer ircServerPort = getIrcServerPort(settings);
 		configBuilder.setServer(ircServerHost, ircServerPort);
-		//LOGGER.debug("irc server name = " + ircServerHost);
-		//LOGGER.debug("irc server port = " + ircServerPort);
+		configBuilder.setAutoReconnect(true);
+		LOGGER.debug("irc server name = " + ircServerHost);
+		LOGGER.debug("irc server port = " + ircServerPort);
 
 		// set to use ssl
 		if (isIrcServerSSL(settings))
@@ -310,20 +401,20 @@ implements InitializingBean, DisposableBean
 		{
 			String projectId = project.getId().toString();
 			String projectName = project.getName();
-			// LOGGER.debug(String.format("projectName = %s, projectId = %s", projectName, projectId));
+			LOGGER.debug(String.format("projectName = %s, projectId = %s", projectName, projectId));
 
-			if (isIrcActive(settings) && isIrcActiveForProject(settings, projectId))
+			if (isIrcActive(settings) && isIrcActiveForProject(settings, projectId) && isIrcJoinChannelForProject(settings, projectId))
 			{
 				String channelName = getIrcChannelForProject(settings, projectId);
 				//irc.sendIRC().joinChannel(channelName);
-				// LOGGER.debug(String.format("channelName = %s", channelName));
+				LOGGER.debug(String.format("channelName = %s", channelName));
 				configBuilder.addAutoJoinChannel(channelName);
 			}
 		}
 
 		// create the irc client using our config
+		LOGGER.debug("creating PircBotX and launching in its own thread)");
 		this.irc = new PircBotX(configBuilder.buildConfiguration());
-
 		// start the irc client in a new thread
 		new Thread(new Runnable()
 		{
@@ -333,10 +424,11 @@ implements InitializingBean, DisposableBean
 				try
 				{
 					irc.startBot();
+					LOGGER.debug("starting PircBotX");
 				}
 				catch (Exception ex)
 				{
-					// LOGGER.error(String.format("error connecting to IRC: %s", ex.toString()));
+					LOGGER.error(String.format("error connecting to IRC: %s", ex.toString()));
 				}
 			}
 		}).start();
@@ -344,15 +436,26 @@ implements InitializingBean, DisposableBean
 	} // }}}
 	private void ircDestroy() // {{{
 	{
+		LOGGER.info("ircDestroy()");
 		if (irc != null)
 		{
-			irc.sendIRC().quitServer("bye");
+			try
+			{
+				irc.stopBotReconnect();
+				irc.sendIRC().quitServer("bye");
+			}
+			catch (Exception ex)
+			{
+				LOGGER.error(String.format("error sending QUIT to IRC: %s", ex.toString()));
+				// TODO forcefully interrupt thread?
+			}
 			this.irc = null;
 		}
 	} // }}}
 	// helper methods
-	private void sendMessage(String projectId, String channelName, String message) // {{{
+	private void sendNotification(String projectId, String channelName, String message) // {{{
 	{
+		LOGGER.info(String.format("sendNotification to %s -> %s", channelName, message));
 		if (irc == null)
 		{
 			ircCreate();
@@ -363,14 +466,15 @@ implements InitializingBean, DisposableBean
 			return;
 		}
 
-		/* // dont need because pircbotx will auto join
-		if (Arrays.asList(irc.getIrcChannelForProjects()).contains(channelName) == false)
+		/* // what if two projects contradict each other on the join setting for same channel??
+		if (isIrcJoinChannelForProject() == false) // TOOD: if user changed setting to no longer be external message
 		{
-			// LOGGER.info(String.format("join channel (%s)", channelName));
+			LOGGER.info(String.format("join channel (%s)", channelName));
 			irc.sendIRC().joinChannel(channelName);
 		}
 		*/
 
+		// TODO: if not connected, get new config and force restart
 		if (isIrcNoticeForProject(settings, projectId))
 		{
 			irc.sendIRC().notice(channelName, message);
@@ -385,27 +489,21 @@ implements InitializingBean, DisposableBean
 		if (issueEvent.getComment() != null && StringUtils.isNotBlank(issueEvent.getComment().getBody()))
 		{
 			String comment = StringUtils.abbreviate(issueEvent.getComment().getBody(), 60);
-			sendMessage(projectId, channelName, String.format("\"%s\"", comment));
+			sendNotification(projectId, channelName, String.format("\"%s\"", comment));
 		}
 	} // }}}
 	private void sendTimeSpent(String projectId, String channelName, Long timeSpent) // {{{
 	{
 		if (timeSpent != null)
 		{
-			sendMessage(projectId, channelName, String.format("Time Worked: " + DateUtils.getDurationString(timeSpent, 8, 5)));
+			sendNotification(projectId, channelName, String.format("Time Worked: " + DateUtils.getDurationString(timeSpent, 8, 5)));
 		}
-	} // }}}
-	private void sendIssueUrl(String channelName, Issue issue) // {{{
-	{
-		String projectId = issue.getProjectObject().getId().toString();
-		String url = getIssueUrl(issue);
-		sendMessage(projectId, channelName, url);
 	} // }}}
 	private void sendIssueUrl(PluginSettings settings, String channelName, Issue issue, String option) // {{{
 	{
 		String projectId = issue.getProjectObject().getId().toString();
 		String url = getIssueUrl(issue);
-		sendMessage(projectId, channelName, url.concat(option));
+		sendNotification(projectId, channelName, url.concat(option));
 	} // }}}
 	private String getIssueUrl(Issue issue) // {{{
 	{
@@ -456,6 +554,15 @@ implements InitializingBean, DisposableBean
 			return "#test";
 		}
 		return channelName;
+	} // }}}
+	private boolean isIrcJoinChannelForProject(PluginSettings settings, String projectId) // {{{
+	{
+		boolean joinChannel = Boolean.parseBoolean(
+			(String)settings.get(
+				IrcProjectConfig.class.getName() + "_" + projectId + ".joinChannel"
+			)
+		);
+		return joinChannel;
 	} // }}}
 	private boolean isIrcActiveForProject(PluginSettings settings, String projectId) // {{{
 	{

@@ -1,36 +1,36 @@
 <html>
 	<head>
-		<title>$i18n.getText("irc.project.label")</title>
+		<title>$i18n.getText("biz.wiz.jira.plugins.irc.project.label")</title>
 		<meta name="decorator" content="atl.admin" />
 		<meta name="application-base-url" content="$applicationProperties.getBaseUrl()">
 		$webResourceManager.requireResource("biz.wiz.jira.plugins.irc:project-resources")
 	</head>
 	<body>
-		<h1>$i18n.getText("irc.project.label")</h1>
+		<h1>$i18n.getText("biz.wiz.jira.plugins.irc.project.label")</h1>
 		<form id="project" class="aui">
 		<input type="hidden" id="projectId" name="projectId" value="$projectId"/>
 			<div>
-				<label for="active">$i18n.getText("irc.project.active.label")</label>
+				<label for="active">$i18n.getText("biz.wiz.jira.plugins.irc.project.active.label")</label>
 				<input type="checkbox" id="active" name="active">
 			</div>
 			<div>
-				<label for="channelName">$i18n.getText("irc.project.channelName.label")</label>
+				<label for="channelName">$i18n.getText("biz.wiz.jira.plugins.irc.project.channelName.label")</label>
 				<input type="text" id="channelName" name="channelName" class="text">
 			</div>
 			<div>
-				<label for="notice">$i18n.getText("irc.project.notice.label")</label>
+				<label for="notice">$i18n.getText("biz.wiz.jira.plugins.irc.project.notice.label")</label>
 				<input type="checkbox" id="notice" name="notice">
 			</div>
 			<div>
-				<label for="messageWithoutJoin">$i18n.getText("irc.project.messageWithoutJoin.label")</label>
-				<input type="checkbox" id="messageWithoutJoin" name="messageWithoutJoin">
+				<label for="joinChannel">$i18n.getText("biz.wiz.jira.plugins.irc.project.joinChannel.label")</label>
+				<input type="checkbox" id="joinChannel" name="joinChannel">
 			</div>
 			<div>
-				<label for="noColors">$i18n.getText("irc.project.noColors.label")</label>
+				<label for="noColors">$i18n.getText("biz.wiz.jira.plugins.irc.project.noColors.label")</label>
 				<input type="checkbox" id="noColors" name="noColors">
 			</div>
 			<div>
-				<input id="submit" type="submit" value="$i18n.getText("irc.project.save.label")" class="button">
+				<input id="submit" type="submit" value="$i18n.getText("biz.wiz.jira.plugins.irc.project.save.label")" class="button">
 			</div>
 		</form>
 	</body>

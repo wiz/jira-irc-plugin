@@ -10,12 +10,12 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <organization>
-        <name>J. Maurice (@wiz)</name>
+        <name>wiz</name>
         <url>https://wiz.biz/</url>
     </organization>
 
-    <name>IRC Notification Plugin</name>
-    <description>A simple IRC notification plugin for Atlassian JIRA. IRC server configuration is in Settings -> System -> Add-ons, IRC channel notification configuration is set per-project in each project's settings.</description>
+    <name>IRC Plugin for JIRA</name>
+    <description>A simple IRC notification plugin for Atlassian JIRA. After installing, configure the IRC server in Settings -> System -> Add-ons -> IRC Notifications, and setup per-project notifications on each project's settings page.</description>
     <packaging>atlassian-plugin</packaging>
 
     <dependencies>
@@ -54,32 +54,25 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>2.5.6.SEC02</version>
+            <scope>provided</scope>
         </dependency>
-
-        <!-- WIRED TEST RUNNER DEPENDENCIES -->
+		<!--
         <dependency>
-            <groupId>com.atlassian.plugins</groupId>
-            <artifactId>atlassian-plugins-osgi-testrunner</artifactId>
-            <version>${plugin.testrunner.version}</version>
-            <scope>test</scope>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+            <scope>provided</scope>
         </dependency>
+		-->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
             <version>1.1.1</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.2-atlassian-1</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>

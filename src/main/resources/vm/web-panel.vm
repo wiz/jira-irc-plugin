@@ -1,1 +1,1 @@
-<a href="${baseurl}/plugins/servlet/irc/project?projectId=$project.id">$i18n.getText("irc.project.label")</a>
+<a href="${baseurl}/plugins/servlet/irc/project?projectId=$project.id">$i18n.getText("biz.wiz.jira.plugins.irc.project.label")</a>

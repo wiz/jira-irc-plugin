@@ -15,18 +15,18 @@
 	</plugin-info>
 
 	<!-- add our i18n resource -->
-	<resource type="i18n" name="i18n" location="i18n"/>
+	<resource type="i18n" name="i18n" location="biz.wiz.jira.plugins.irc.i18n"/>
 
 	<!-- add our web resources -->
 	<web-item key="jira-menu-item" name="IRC Notifications"
 		section="system.admin/globalsettings" weight="10" application="jira">
 		<description>Link to irc-plugin-admin page.</description>
-		<label key="irc.admin.label" />
+		<label key="biz.wiz.jira.plugins.irc.admin.label" />
 		<link linkId="irc-admin-link">/plugins/servlet/irc/admin</link>
 	</web-item>
 
 	<web-panel key="ircPanel" location="webpanels.admin.summary.right-panels">
-		<label key="irc.project.label" />
+		<label key="biz.wiz.jira.plugins.irc.project.label" />
 		<resource name="view" type="velocity" location="vm/web-panel.vm" />
 	</web-panel>
 

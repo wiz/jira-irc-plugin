@@ -16,7 +16,7 @@ public final class IrcProjectConfig
 	private String channelName;
 
 	@XmlElement
-	private Boolean messageWithoutJoin;
+	private Boolean joinChannel;
 
 	@XmlElement
 	private Boolean notice;
@@ -34,14 +34,14 @@ public final class IrcProjectConfig
 		this.channelName = channelName;
 	}
 
-	public Boolean getMessageWithoutJoin()
+	public Boolean getJoinChannel()
 	{
-		return messageWithoutJoin;
+		return joinChannel;
 	}
 
-	public void setMessageWithoutJoin(Boolean messageWithoutJoin)
+	public void setJoinChannel(Boolean joinChannel)
 	{
-		this.messageWithoutJoin = messageWithoutJoin;
+		this.joinChannel = joinChannel;
 	}
 
 	public Boolean getNoColors()

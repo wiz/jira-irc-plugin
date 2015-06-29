@@ -13,8 +13,8 @@ import javax.ws.rs.core.Response.Status;
 
 import biz.wiz.jira.plugins.irc.beans.IrcAdminConfig;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
@@ -28,7 +28,7 @@ public class IrcAdminConfigResource
 	private final UserManager userManager;
 	private final PluginSettingsFactory pluginSettingsFactory;
 	private final TransactionTemplate transactionTemplate;
-	//private static final Logger LOGGER = LoggerFactory .getLogger(IrcAdminConfigResource.class);
+	private static final Logger LOGGER = LoggerFactory .getLogger(IrcAdminConfigResource.class);
 
 	public IrcAdminConfigResource
 	(
@@ -46,11 +46,11 @@ public class IrcAdminConfigResource
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response get(@Context HttpServletRequest request)
 	{
-		// LOGGER.debug(String.format("get : start(%s)", request));
+		LOGGER.debug(String.format("get : start(%s)", request));
 		String username = userManager.getRemoteUsername(request);
 		if (username != null && !userManager.isSystemAdmin(username))
 		{
-			// LOGGER.debug(String.format("get : finished(%s)", request));
+			LOGGER.debug(String.format("get : finished(%s)", request));
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 		Response result = Response.ok(
@@ -87,7 +87,7 @@ public class IrcAdminConfigResource
 				}
 			})
 		).build();
-		// LOGGER.debug(String.format("get : finished(%s)", result));
+		LOGGER.debug(String.format("get : finished(%s)", result));
 		return result;
 	}
 
