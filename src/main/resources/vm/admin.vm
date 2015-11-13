@@ -21,6 +21,10 @@
 				<input type="text" id="ircServerPort" name="ircServerPort" class="text">
 			</div>
 			<div>
+				<label for="ircServerPassword">$i18n.getText("biz.wiz.jira.plugins.irc.admin.ircServerPassword.label")</label>
+				<input type="text" id="ircServerPassword" name="ircServerPassword" class="text">
+			</div>
+			<div>
 				<label for="ircServerSSL">$i18n.getText("biz.wiz.jira.plugins.irc.admin.ircServerSSL.label")</label>
 				<input type="checkbox" id="ircServerSSL" name="ircServerSSL">
 			</div>

@@ -23,6 +23,8 @@ AJS.toInit(function()
 
 				AJS.$('#ircServerPort').attr('value', config.ircServerPort);
 
+				AJS.$('#ircServerPassword').attr('value', config.ircServerPassword);
+
 				if (config.ircServerSSL)
 				{
 					AJS.$('#ircServerSSL').attr('checked', 'checked');
@@ -42,6 +44,7 @@ AJS.toInit(function()
 			active: (AJS.$('#active').attr('checked') == 'checked'),
 			ircServerHost: AJS.$('#ircServerHost').attr('value'),
 			ircServerPort: AJS.$('#ircServerPort').attr('value'),
+			ircServerPassword: AJS.$('#ircServerPassword').attr('value'),
 			ircServerSSL: (AJS.$('#ircServerSSL').attr('checked') == 'checked')
 		}
 		AJS.$.ajax(
