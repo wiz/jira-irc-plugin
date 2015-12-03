@@ -76,6 +76,9 @@ public class IrcAdminConfigResource
 						config.setIrcServerPort(Integer.parseInt(ircServerPort));
 					}
 
+					// server password
+					config.setIrcServerPassword((String)settings.get(IrcAdminConfig.class.getName() + ".ircServerPassword"));
+
 					// server ssl or plaintext
 					String ircServerSSL = (String) settings.get(IrcAdminConfig.class.getName() + ".ircServerSSL");
 					config.setIrcServerSSL((ircServerSSL != null && Boolean.parseBoolean(ircServerSSL)));
@@ -110,6 +113,7 @@ public class IrcAdminConfigResource
 				pluginSettings.put(IrcAdminConfig.class.getName() + ".active", config.getActive().toString());
 				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerHost", config.getIrcServerHost());
 				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerPort", Integer.toString(config.getIrcServerPort()));
+				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerPassword", config.getIrcServerPassword());
 				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircServerSSL", config.getIrcServerSSL().toString());
 				pluginSettings.put(IrcAdminConfig.class.getName() + ".ircClientNick", config.getIrcClientNick());
 				return null;

@@ -16,6 +16,9 @@ public final class IrcAdminConfig
 	private int ircServerPort;
 
 	@XmlElement
+	private String ircServerPassword;
+
+	@XmlElement
 	private Boolean ircServerSSL;
 
 	@XmlElement
@@ -42,6 +45,16 @@ public final class IrcAdminConfig
 	public void setIrcServerPort(int ircServerPort)
 	{
 		this.ircServerPort = ircServerPort;
+	}
+
+	public String getIrcServerPassword()
+	{
+		return ircServerPassword;
+	}
+
+	public void setIrcServerPassword(String ircServerPassword)
+	{
+		this.ircServerPassword = ircServerPassword;
 	}
 
 	public Boolean getIrcServerSSL()

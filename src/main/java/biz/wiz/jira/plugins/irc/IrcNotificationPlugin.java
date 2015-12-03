@@ -375,11 +375,22 @@ implements InitializingBean, DisposableBean
 
 		// get server hostname and port
 		String ircServerHost = getIrcServerHost(settings);
+		String ircServerPassword = getIrcServerPassword(settings);
 		Integer ircServerPort = getIrcServerPort(settings);
-		configBuilder.setServer(ircServerHost, ircServerPort);
-		configBuilder.setAutoReconnect(true);
+
 		LOGGER.debug("irc server name = " + ircServerHost);
 		LOGGER.debug("irc server port = " + ircServerPort);
+
+		if (ircServerPassword != null)
+		{
+			LOGGER.debug("irc server has password");
+			configBuilder.setServer(ircServerHost, ircServerPort, ircServerPassword);
+		}
+		else
+		{
+			configBuilder.setServer(ircServerHost, ircServerPort);
+		}
+		configBuilder.setAutoReconnect(true);
 
 		// set to use ssl
 		if (isIrcServerSSL(settings))
@@ -523,6 +534,17 @@ implements InitializingBean, DisposableBean
 			return "127.0.0.1";
 		}
 		return ircServerHost;
+	} // }}}
+	private String getIrcServerPassword(PluginSettings settings) // {{{
+	{
+		String ircServerPassword = (String)settings.get(
+			IrcAdminConfig.class.getName() + ".ircServerPassword"
+		);
+		if (ircServerPassword.equals(""))
+		{
+			return null;
+		}
+		return ircServerPassword;
 	} // }}}
 	private Integer getIrcServerPort(PluginSettings settings) // {{{
 	{
