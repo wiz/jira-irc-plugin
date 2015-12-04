@@ -13,6 +13,8 @@ import org.pircbotx.Colors;
 import org.pircbotx.PircBotX;
 import org.pircbotx.UtilSSLSocketFactory;
 
+import org.ofbiz.core.entity.GenericValue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.atlassian.core.util.map.EasyMap;
 import com.atlassian.core.util.DateUtils;
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.event.api.EventListener;
@@ -276,7 +279,7 @@ implements InitializingBean, DisposableBean
 			// line 3
 			sendIssueEventComment(settings, projectId, channelName, issueEvent);
 		} // }}}
-		else if (eventTypeId.equals(EventType.ISSUE_UPDATED_ID)) // {{{
+		else if (eventTypeId.equals(EventType.ISSUE_UPDATED_ID) || eventTypeId.equals(EventType.ISSUE_GENERICEVENT_ID)) // {{{
 		{
 			// line 1
 			String message = String.format(
@@ -289,7 +292,29 @@ implements InitializingBean, DisposableBean
 			// line 2
 			message = String.format("%s (%s) updated %s", userDisplayName, userName, issueKey);
 			sendNotification(projectId, channelName, message);
-			// line 3
+
+			GenericValue changeLog = issueEvent.getChangeLog();
+			List<GenericValue> changeItems = null;
+			try
+			{
+				changeItems = changeLog.internalDelegator.findByAnd("ChangeItem", EasyMap.build("group",changeLog.get("id")));
+			}
+			catch (Exception ex)
+			{
+				LOGGER.error(String.format("error building changeLog", ex.toString()));
+			}
+			for(GenericValue changeVal : changeItems)
+			{
+				String field = changeVal.getString("field");
+				String newstring = changeVal.getString("newstring");
+				message = String.format(
+					Colors.RED + "[%s] " + Colors.NORMAL +
+					"%s (%s) field changed " + Colors.BOLD + "%s" + Colors.NORMAL + " to %s",
+					issueKey, userDisplayName, userName, field, newstring);
+				sendNotification(projectId, channelName, message);
+			}
+
+			// line 3+
 			sendIssueEventComment(settings, projectId, channelName, issueEvent);
 		} // }}}
 		else if (eventTypeId.equals(EventType.ISSUE_WORKLOGGED_ID)) // {{{
