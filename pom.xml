@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>biz.wiz.jira.plugins</groupId>
     <artifactId>irc</artifactId>
     <version>1.0.2</version>
-
     <organization>
         <name>wiz</name>
         <url>https://wiz.biz/</url>
     </organization>
-
     <name>IRC Plugin for JIRA</name>
-    <description>A simple IRC notification plugin for Atlassian JIRA. After installing, configure the IRC server in Settings -> System -> Add-ons -> IRC Notifications, and setup per-project notifications on each project's settings page.</description>
+    <description>A simple IRC notification plugin for Atlassian JIRA. After installing, configure the IRC server in Settings -&gt; System -&gt; Add-ons -&gt; IRC Notifications, and setup per-project notifications on each project's settings page.</description>
     <packaging>atlassian-plugin</packaging>
-
     <dependencies>
         <dependency>
             <groupId>com.atlassian.jira</groupId>
@@ -59,7 +53,7 @@
             <version>2.5.6.SEC02</version>
             <scope>provided</scope>
         </dependency>
-		<!--
+        <!--
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -74,7 +68,6 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -97,11 +90,9 @@
             </plugin>
         </plugins>
     </build>
-
     <properties>
         <jira.version>6.4.7</jira.version>
-        <amps.version>5.0.13</amps.version>
+        <amps.version>6.2.1</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
     </properties>
-
 </project>
