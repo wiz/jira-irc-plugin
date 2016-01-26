@@ -565,7 +565,7 @@ implements InitializingBean, DisposableBean
 		String ircServerPassword = (String)settings.get(
 			IrcAdminConfig.class.getName() + ".ircServerPassword"
 		);
-		if (ircServerPassword.equals(""))
+		if (ircServerPassword == null || ircServerPassword.equals(""))
 		{
 			return null;
 		}
