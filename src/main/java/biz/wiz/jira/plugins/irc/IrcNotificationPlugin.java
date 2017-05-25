@@ -25,7 +25,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 import com.atlassian.core.util.map.EasyMap;
 import com.atlassian.core.util.DateUtils;
-import com.atlassian.crowd.embedded.api.User;
+import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.event.api.EventListener;
 import com.atlassian.event.api.EventPublisher;
 import com.atlassian.jira.event.issue.IssueEvent;
@@ -161,7 +161,7 @@ implements InitializingBean, DisposableBean
 		else if (eventTypeId.equals(EventType.ISSUE_COMMENTED_ID) || eventTypeId.equals(EventType.ISSUE_COMMENT_EDITED_ID)) // {{{
 		{
 			Comment comment = issueEvent.getComment();
-			User authorUser = comment.getAuthorUser();
+			ApplicationUser authorUser = comment.getAuthorApplicationUser();
 			String authUserDisplayName = authorUser.getDisplayName();
 			String authUserName = authorUser.getName();
 			String commentBody = StringUtils.abbreviate(comment.getBody(), 20);
